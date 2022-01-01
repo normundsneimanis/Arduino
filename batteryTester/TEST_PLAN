@@ -1,0 +1,17 @@
+ * DONE Understand which parts are delivered and which are missing
+
+ * DONE Solder microcontroller and supporting circuit
+ * DONE Solder display port and supporting circuit
+ * DONE Solder serial to parallel chip
+ * DONE Solder analog multiplexer
+
+ * DONE Test that serial to parallel is working
+ * DONE Test that analog multiplexer is working 
+ * DONE Test that display can be rotated and is working
+ * DONE Test rotary encoder
+
+ * De-solder resistors
+ * Connect 4V voltage to connector. Plate cleanness check, pleate short-circuit check.
+	o Check if voltage propogates to neighboring spots on the plate
+	o Check if voltage propogates to neighboring ports
+	o 

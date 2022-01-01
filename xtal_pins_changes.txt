@@ -1,0 +1,28 @@
+https://forum.arduino.cc/index.php?topic=411872.0
+pins_arduino.h changes
+
++#define NUM_DIGITAL_PINS            23
++#define NUM_ANALOG_INPUTS           8  // 8 for TQFP, 6 for DIP
+
+
+-static const uint8_t A6 = 20;
+-static const uint8_t A7 = 21;
++static const uint8_t A6 = 23;
++static const uint8_t A7 = 24;
+
+
+add to the end of const uint8_t PROGMEM digital_pin_to_port_PGM[] = {
+
++       PB, // PB6 - D20 / XTAL1
++       PB, // PB7 - D21 / XTAL2
+
+
+add to the end of const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = {
++       _BV(6); // PB6 - D20 / XTAL1
++       _BV(7); // PB7 - D21 / XTAL2
+
+
+add to the end of const uint8_t PROGMEM digital_pin_to_timer_PGM[] = {
++       NOT_ON_TIMER, // PB6 - D20 / XTAL1
++       NOT_ON_TIMER, // PB7 - D21 / XTAL2
+

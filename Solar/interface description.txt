@@ -1,0 +1,28 @@
+
+
+light sensor trigger - 1minute
+light sensor
+	readReading
+	setNightThreshold
+	isNight
+	isDay
+data:
+	average light
+	
+	
+status led trigger time - 10 seconds for 20 msec
+
+statusLed
+	red
+	green
+	
+buttons
+	enable/disable auto
+	trigger
+	
+readNetwork
+	
+humiditySensor
+	averageHumidity
+	getLastReading
+	hasNewReading

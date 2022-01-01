@@ -1,0 +1,153 @@
+
+//
+//void tftModePrint(const int mode) {
+//  tft.fillRect(0, 20, 160, 40, ST7735_BLUE);
+//  tft.setTextSize(2);
+//  tft.setCursor(0, 50);
+//  tft.print(menuModeName[mode]);
+//}
+//
+//void tftMenuPrintList(int entered) {
+//  tft.fillRect(10, 60, 160, 128, ST7735_BLACK);
+//  tft.setCursor(10, 80);
+//  tft.setTextSize(1);
+//  currentMenuState = currentMenuState - 1;
+//  currentMenuState = (currentMenuState % 4);
+//  tft.print(currentMenu[currentMenuState].text);
+//  if (entered) {
+//    infoCallback = menuState[currentMenuState].getCB;
+//    tftIntPrint(infoCallback());
+//  }
+//  currentMenuState = (currentMenuState + 1) % 4;
+//  tft.setCursor(10, 100);
+//  tft.print(currentMenu[currentMenuState].text);
+//  if (entered) {
+//    infoCallback = menuState[currentMenuState].getCB;
+//    tftIntPrint(infoCallback());
+//  }
+//  currentMenuState = (currentMenuState + 1) % 4;
+//  tft.setCursor(10, 120);
+//  tft.print(currentMenu[currentMenuState].text);
+//  if (entered) {
+//    infoCallback = menuState[currentMenuState].getCB;
+//    Serial.println(infoCallback());
+//    tftIntPrint(infoCallback());
+//  }
+//  currentMenuState = (currentMenuState - 1) % 4;
+//}
+//
+//void tftMenuPrint(const char *text) {
+//  tft.fillScreen(ST7735_BLACK);
+//  tft.setCursor(0, 50);
+//  tft.print(text);
+//}
+//
+//void tftDataPrint(const char *text) {
+//  tft.setCursor(0, 50);
+//  tft.print(text);
+//}
+//
+
+//int encoderPrev = 0;
+//int menuLevel = 0;
+//int currentMode = 0;
+//  // mode selection
+//  if (menuLevel == 0 && encoderPrev != encoder.getCurrentPosition()) {
+//    if (encoderPrev < encoder.getCurrentPosition()) {
+//      currentMode = menuModes[currentMode].prevState;
+//    } else if (encoderPrev > encoder.getCurrentPosition()) {
+//      currentMode = menuModes[currentMode].nextState;
+//    }
+//    encoderPrev = encoder.getCurrentPosition();
+//    tftModePrint(currentMode);
+//  }
+//  if (menuLevel == 0 && encoder.buttonPressed()) {
+//    menuLevel = 1;
+//    currentMenu = modeMenus[currentMode];
+//    currentMenuState = 0;
+////    currentMenuState = currentMenu->nextState;
+//    Serial.println(currentMenu[currentMenuState].text);
+//    tftMenuPrintList(0);
+//  }
+//  if (menuLevel == 1 && encoderPrev != encoder.getCurrentPosition()) {
+//    if (encoderPrev < encoder.getCurrentPosition()) {
+//      currentMenuState = currentMenuState - 1;
+//      currentMenuState = (currentMenuState % 4);
+//    } else if (encoderPrev > encoder.getCurrentPosition()) {
+//      currentMenuState = (currentMenuState + 1) % 4;
+//    }
+//    encoderPrev = encoder.getCurrentPosition();
+//    Serial.println(currentMenuState);
+//    Serial.println(currentMenu[currentMenuState].text);
+//    tftMenuPrintList(0);
+//  }
+//
+//  if (menuLevel == 1 && encoder.buttonPressed()) {
+//    menuLevel = 2;
+//    Serial.println("Menu button pressed");
+//    limitMax = menuState[currentMenuState].limitMinCB;
+//    limitMin = menuState[currentMenuState].limitMaxCB;
+//    currentPosition = menuState[currentMenuState].currentPositionCB;
+//    callback = menuState[currentMenuState].setCB;
+//    encoder.setLimits(limitMax(), limitMin());
+//    encoder.setCurrentPosition(currentPosition());
+//    tftMenuPrintList(1);
+//  }
+//
+//  if (menuLevel == 2 && encoder.buttonPressed()) {
+//    menuLevel = 1;
+//    tftMenuPrintList(0);
+//  }
+//
+//  if (menuLevel == 2 && encoderPrev != encoder.getCurrentPosition()) {
+//    callback(encoder.getCurrentPosition());
+//    encoderPrev = encoder.getCurrentPosition();
+//    tftMenuPrintList(1);
+//  }
+//
+//  if (encoder.buttonLongPressed()) {
+//    Serial.println("Button longpressed");
+//    menuLevel = 0;
+//    tft.fillScreen(ST7735_BLACK);
+//    tftModePrint(currentMode);
+//  }
+
+//
+//static inline void encoderF(void) {
+//  static uint8_t bOldEncA;    // Saved previous (Tn-1) state of encoder
+//  static uint8_t bOldEncB;
+//  static uint8_t dOldEncA;    // Saved previous (Tn-1) state of encoder
+//  static uint8_t dOldEncB;
+//  static uint8_t bEncA;
+//  static uint8_t bEncB;
+//  
+//  bEncA = !!(PIND & (1<<PD2));    // Save current (Tn) state of encoder
+//  bEncB = !!(PINC & (1<<PC1));
+//  if ((dOldEncA == bEncA) && (dOldEncB == bEncB)) {
+//    if ((bEncA != bOldEncA) || (bEncB != bOldEncB)) {
+//      Serial.print(bEncA);
+//      Serial.print(" ");
+//      Serial.print(bEncB);
+//      Serial.print(" ");
+//      Serial.println((bEncA ^ bOldEncA) == (bEncA ^ bEncB));
+//      // State of encoder has changed. We need to check
+//      // this explicitly as other (non-encoder) edge-triggered
+//      // events may have caused the PORTB interrupt-on-edge
+//      // interrupt to trigger and we would therefore multiply
+//      // count some phase changes.
+//  
+////      if ((bEncA ^ bOldEncA) == (bEncA ^ bEncB)) {
+//      if ((bEncA ^ bOldEncA) == (bEncA ^ bEncB)) {
+//        encoder.stepDown();
+//      } else {
+//        encoder.stepUp();
+//      }
+//  
+//      bOldEncA = bEncA;   // Preserve this state for next time
+//      bOldEncB = bEncB;
+//    }
+//  } else {
+//    dOldEncA = bEncA;
+//    dOldEncB = bEncB;
+//  }
+//}

@@ -1,0 +1,31 @@
+###############################################################################
+#####   keep your distance
+###############################################################################
+
+###############################################################################
+### Sensors:
+###############################################################################
+	1 infrared sensor
+	2 motor controllers
+	
+###############################################################################
+### Software
+###############################################################################
+set distance threshold, from, to
+read sensor, normalize value to remove errors (average of previous 5 readings)
+if sensor is less then $from
+	drive back
+if sensor is more then $from
+	drive forward
+
+###############################################################################
+### Hardware
+###############################################################################
+Distance sensor (sharp infra-red)
+motor controller h-bridge
+TODO: Determine how exactly I configure the robot
+	
+	
+2) Detect what is in the middle
+3 infrared sensors
+keep middle sensor reading smaller thus detecting where the middle is

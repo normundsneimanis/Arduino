@@ -1,0 +1,11 @@
+# Active low pass filter
+http://www.radio-electronics.com/info/circuits/opamp_low_pass_filter/op_amp_lowpassfilter.php
+
+# Op-amp with 35V input
+opa134pa
+
+# Summing amplifier
+http://hyperphysics.phy-astr.gsu.edu/hbase/Electronic/opampvar5.html#c1
+
+# Another low-pass filter
+http://www.electronics-tutorials.ws/filter/filter_5.html

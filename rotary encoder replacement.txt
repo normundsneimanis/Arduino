@@ -1,0 +1,29 @@
+hardware:
+remove potentiometer
+remove two buttons
+rotary pin2 to pin15
+move pin 2 to pin 16
+connect encoder button to pin 17
+
+20 minutes
+
+solder rotary directly to ground and pins
+30 minutes
+
+software
+isr to count revolutions
+	1) with 1 increment
+	2) with 5 increment starting from 0 to 99
+1h
+	
+time lapse configuration
+	press once (green) - configure run
+	press (blue) - configure wait
+	press again (back to normal mode)
+1h
+	
+Cheat mode: 4 keypresses in less then 4 seconds - enter pregressive time lapse mode
+	turn left - decreasing mode
+	turn right - increasing mode
+	configure amount if increase/decrease
+1h

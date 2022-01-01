@@ -1,0 +1,29 @@
+Izrēķināt siltumnīcas mehānisma darbību ar akumulatoru
+ * 2 x 2A motori
+ * aizveershanas/atveershanas laiks 10 sekundes
+ mikrokontroliera elektrības patēriņš 200uA mikroampeeri
+ darbiibas laiks dienaa
+ 
+ atveerts/aizveerts logs/durvis 3 reizes dienaa
+ 2A * 30 sekundes = 2A * 60 sekundes = 120 Ampeersekundes / dienaa = 2 ampeerminuutes dienaa
+ 
+ja akumulatoraa ir 6 ampeerstundas, tad:
+	6 ampeerstundas / 2 ampeerminuutes = 360 / 2 = 180 dienas = 6 meeneshi
+	
+	
+avrdude -P COM3 -b 19200 -c avrisp -p m16 -v worked
+avrdude -P /dev/ttyACM0 -b 19200 -c avrisp -p m328p -U efuse:w:0x06:m
+
+avrdude -P COM3 -b 19200 -c avrisp -p m328p -U efuse:w:0x06:m
+
+
+avrdude -CC:\Users\Long\AppData\Local\Arduino15\packages\arduino\tools\avrdude\6.3.0-arduino8/etc/avrdude.conf -v -patmega328p -cstk500v1 -PCOM5 -b19200 -U efuse:w:0x06:m
+
+########## This is final
+# this works with Arduino ISP and windows command line
+# Fuses:  Low: E2  High: DF  Ext: FF(07)
+avrdude -v -patmega328p -cstk500v1 -PCOM5 -b19200 -U lfuse:w:0xe2:m -U hfuse:w:0xdf:m -U efuse:w:0x07:m 
+
+
+#### Solar watchdog flags for attiny85
+avrdude -v -pattiny85 -cstk500v1 -PCOM5 -b19200 -U lfuse:w:0x62:m -U hfuse:w:0xdd:m

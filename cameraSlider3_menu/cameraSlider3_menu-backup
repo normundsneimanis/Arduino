@@ -1,0 +1,523 @@
+#include "hallSensorInput.h"
+#include "timedelay.h"
+#include "rotaryEncoder.h"
+#include "menu.h"
+#include "images.h"
+
+/* Arduino Pro Mini
+#define cs_sd   10
+#define cs_lcd   9
+#define dc       8
+#define rst      7
+*/
+
+/* Slider Controller */
+#define cs_lcd   9
+#define dc       10
+#define rst      7
+
+/* 
+ *  Camera photo requests
+ *    focus  10  6
+ *    pic    16 12
+ */
+#define cameraTriggerFocus 6
+#define cameraTriggerPic 12
+
+
+/* Camera photo trigger 
+ *  2 (4) 
+ *  9 (5) 
+ */
+#define triggerFocus 4
+#define triggerPic 5
+
+/* Slider direction requests 
+ *  left 12  (8)
+ *  right 23 (A0)
+
+*/
+#define directionSwitchLeft 8
+#define directionSwitchRight A0
+
+/* Analog input pins
+ *  sens1 27 (A4)
+ *  sens2 28 (A5)
+*/
+#define hallSensorLeft A4
+#define hallSensorRight A5
+
+/* rotary encoder 
+ *  button - 26  (A3)
+ *  right - 24   (A1)
+ *  left - 32    (2)
+
+*/
+#define encoderPinLeft 2
+#define encoderPinRight A1
+#define encoderButtonPin A3
+
+/* 
+ *  Voltage sensor
+ *  19 (A6)
+ */
+#define batterySensor A6
+
+
+typedef enum menuStates {
+// main menu
+  MS_BACK,
+  MS_ONE,
+  MS_TWO,
+  MS_THREE,
+
+// first submenu
+  MS_SUB_BACK,
+  MS_SUB_ONE,
+  MS_SUB_TWO,
+  MS_NULL,
+} menuStates_t;
+
+
+typedef struct {
+  menuStates_t thisState;
+  menuStates_t prevState;
+  menuStates_t nextState;
+  const char * text;
+  menuStates_t enter;
+  void (*setCB)(int);
+  int (*getCB)();
+  int (*limitMinCB)();
+  int (*limitMaxCB)();
+  int (*currentPositionCB)();
+} menuItem_t;
+
+int currentPositionData = 0;
+void twoFuncCB(int number) {
+  currentPositionData = number;
+}
+
+void oneFuncCB(int number) {
+  currentPositionData = number;
+}
+
+int oneInfoCB() {
+//  Serial.println("Executing oneInfo");
+  return 25;
+}
+
+int twoInfoCB() {
+//  Serial.println("Executing twoInfo");
+  return 53;
+}
+
+int limitMinCB() {
+  return 0;
+}
+
+int limitMaxCB() {
+  return 100;
+}
+
+int currentPositionCB() {
+  return currentPositionData;
+}
+
+typedef enum menuModes {
+  MM_SLIDER,
+  MM_TIMELAPSE,
+  MM_PROGTIMELAPSE,
+  MM_STOPMOTION,
+} menuModes_t;
+
+typedef struct {
+  menuModes_t thisState;
+  menuModes_t prevState;
+  menuModes_t nextState;
+} menuMode_t;
+
+const char * const menuStateName[] = {
+  "Back",
+  "ONE",
+  "Two",
+  "Three",
+  "subback",
+  "Submenu 1",
+  "Submenu 2",
+};
+
+const menuItem_t menuState[] = {
+// ID ,         prevState,        nextState,       text,             enter,      callback,    infoCallback,   limitMin,   limitMax, currentPosition
+  // mainmenu
+  {MS_BACK,     MS_THREE,         MS_ONE,          menuStateName[0], MS_NULL,    oneFuncCB,          oneInfoCB,        limitMinCB,   limitMaxCB, currentPositionCB},
+  {MS_ONE,      MS_BACK,          MS_TWO,          menuStateName[1], MS_SUB_ONE, oneFuncCB,          twoInfoCB,        limitMinCB,   limitMaxCB, currentPositionCB},
+  {MS_TWO,      MS_ONE,           MS_THREE,        menuStateName[2], MS_NULL,    twoFuncCB,  oneInfoCB,        limitMinCB,   limitMaxCB, currentPositionCB},
+  {MS_THREE,    MS_TWO,           MS_BACK,         menuStateName[3], MS_NULL,    oneFuncCB,  twoInfoCB,        limitMinCB,   limitMaxCB, currentPositionCB},
+};
+
+const char * const menuModeName[] = {
+  "Slider",
+  "TL",
+  "TL Pro",
+  "Step M",
+};
+
+const menuItem_t *modeMenus[] = {
+  menuState,
+  menuState,
+  menuState,
+  menuState,
+};
+
+const menuMode_t menuModes[] = {
+  {MM_SLIDER, MM_STOPMOTION, MM_TIMELAPSE},
+  {MM_TIMELAPSE, MM_SLIDER, MM_PROGTIMELAPSE},
+  {MM_PROGTIMELAPSE, MM_TIMELAPSE, MM_STOPMOTION},
+  {MM_STOPMOTION, MM_PROGTIMELAPSE, MM_SLIDER},
+};
+
+
+
+timedelay StatisticsDelay(330); // How frequently to print statistics
+timedelay triggerDelay(2000); // Testing camera trigger delay
+rotaryEncoder encoder(encoderPinLeft, encoderPinRight, encoderButtonPin);
+/*
+ * SD card currently is not working
+ * 
+ * Connections:
+ * Arduino -> Display (port)
+ * 7 -> R 10K -> RST 1
+ * 8 -> R 10K -> D/C 3
+ * 9 -> R 10K -> CS 2
+ * 11 -> R 10K -> DIN 4
+ * 13 -> R 10K -> CLK 5
+ */
+
+
+#include <Adafruit_GFX.h>    // Core graphics library
+#include <Adafruit_ST7735.h> // Hardware-specific library
+#include <Fonts/FreeSerif9pt7b.h>
+#include <SPI.h>
+
+#define BUFFPIXEL 20
+
+// built in SPI interface
+Adafruit_ST7735 tft = Adafruit_ST7735(cs_lcd, dc, rst);
+
+// Software SPI interface
+//#define MOSI 11
+//#define SCK 13
+//Adafruit_ST7735 tft = Adafruit_ST7735(cs_lcd, dc, MOSI, SCK, rst);
+
+// ISR to aggregate rotary encoder movement
+void rotaryEncoderISR() {
+  if (digitalRead(encoderPinLeft) == digitalRead(encoderPinRight)) {
+    encoder.stepUp();
+  } else {
+    encoder.stepDown();
+  }
+}
+
+int printIterator = 0;
+int cameraTriggerState = 0;
+
+void (*callback)(int);
+int (*infoCallback)();
+int (*limitMax)();
+int (*limitMin)();
+int (*currentPosition)();
+uint8_t currentMenuState = 0;
+
+void setup()
+{
+  Serial.begin(115200);
+
+  pinMode(cameraTriggerFocus, INPUT);
+  pinMode(cameraTriggerPic, INPUT);
+  pinMode(triggerFocus, OUTPUT);
+  pinMode(triggerPic, OUTPUT);
+
+  pinMode(directionSwitchLeft, INPUT);
+  digitalWrite(directionSwitchLeft, HIGH);
+  pinMode(directionSwitchRight, INPUT);
+  digitalWrite(directionSwitchRight, HIGH);
+
+  pinMode(hallSensorLeft, INPUT);
+  pinMode(hallSensorRight, INPUT);
+
+  pinMode(batterySensor, INPUT);
+  
+ tft.initR(INITR_BLACKTAB);
+ tft.setRotation(1); // 0 - Portrait, 1 - Landscape
+ tft.fillScreen(ST7735_WHITE);
+ tft.drawBitmap(0, 0, 32, 32, tux);
+ tft.drawBitmap(50, 3, 16, 10, batteryFull);
+ //delay(5000);
+ tft.fillScreen(ST7735_BLACK);
+ tft.setTextWrap(true);
+
+//  tft.fillScreen (ST7735_BLACK);
+//  tft.fillRect (0, 0, 160, 16, ST7735_GREEN);
+//  tft.fillRect (0, 24, 160, 16 ,ST7735_RED);
+
+// delay(2000);
+//
+//  tft.fillScreen (ST7735_BLACK);
+//  tft.fillRect (0, 0, 160, 16, ST7735_GREEN);
+//  tft.fillRect (0, 24, 160, 16 ,ST7735_BLUE);
+//  testdrawtext ("         111111111222123456789012345678901\nScreen is 21 x 20\ncharacters in size.\n", ST7735_WHITE);
+
+//  tft.setCursor (1, 48);
+//  tft.println ("\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz~ right up to ASCII 255\n\nThe quick brown fox  jumped over the lazy dog.\n\n");
+//
+//  tft.setTextColor(ST7735_RED);
+//  tft.setCursor (1, 128-18);
+//  tft.println ("Countdown:");
+
+//  tft.setTextColor (ST7735_BLACK);
+//  tft.setTextSize (2);
+//  for (int i=6; i>=0; i--) {
+//     tft.setCursor (2, 128-18);
+//     tft.fillRect (0, 128-18, 160, 18, ST7735_RED);
+//     tft.print (i);
+//     tft.print (" seconds");
+//     delay(1000);
+//  }
+
+ tft.setTextSize(2);
+ tft.setFont(&FreeSerif9pt7b);
+ tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
+
+
+  encoder.init();
+  attachInterrupt(digitalPinToInterrupt(encoderPinLeft), rotaryEncoderISR, CHANGE);
+
+//  Serial.print("Menu: ");
+//  Serial.println(menuState[currentMenuState].text);
+//  tftMenuPrint(menuState[currentMenuState].text);
+  encoder.setLimits(-10000, 10000);
+  encoder.setCurrentPosition(0);
+  tftModePrint(0);
+
+//  delay(10000);
+//  tft.sleep();
+//  delay(10000);
+//  tft.wake();
+
+// if (!SD.begin(cs_sd)) {
+//   Serial.println("failed!");
+//   return;
+// } else {
+//  bmpDraw("test.bmp", 0, 0);
+//  delay(10000);
+// }
+}
+
+int encoderPrev = 0;
+int menuLevel = 0;
+int currentMode = 0;
+menuItem_t *currentMenu;
+
+void loop() {
+  StatisticsDelay.cycle();
+  triggerDelay.cycle();
+
+  // mode selection
+  if (menuLevel == 0 && encoderPrev != encoder.getCurrentPosition()) {
+    if (encoderPrev < encoder.getCurrentPosition()) {
+      currentMode = menuModes[currentMode].prevState;
+    } else if (encoderPrev > encoder.getCurrentPosition()) {
+      currentMode = menuModes[currentMode].nextState;
+    }
+    encoderPrev = encoder.getCurrentPosition();
+    tftModePrint(currentMode);
+  }
+  if (menuLevel == 0 && encoder.buttonPressed()) {
+    menuLevel = 1;
+    currentMenu = modeMenus[currentMode];
+    currentMenuState = currentMenu->nextState;
+    Serial.println(currentMenu[currentMenuState].text);
+    tftMenuPrintList();
+  }
+  if (menuLevel == 1 && encoderPrev != encoder.getCurrentPosition()) {
+    if (encoderPrev < encoder.getCurrentPosition()) {
+      Serial.print("Prev ");
+      currentMenuState = currentMenuState - 1;
+      currentMenuState = (currentMenuState % 4);
+    } else if (encoderPrev > encoder.getCurrentPosition()) {
+      Serial.print("Next ");
+      currentMenuState = (currentMenuState + 1) % 4;
+    }
+    encoderPrev = encoder.getCurrentPosition();
+    Serial.println(currentMenuState);
+    Serial.println(currentMenu[currentMenuState].text);
+    tftMenuPrintList();
+  }
+
+//  if (encoder.buttonPressed()) {
+//    if (menuState[currentMenuState].enter != MS_NULL) {
+//      currentMenuState = menuState[currentMenuState].enter;
+//      Serial.print("Menu: ");
+//      Serial.print(currentMenuState);
+//      Serial.print(" ");
+//      Serial.println(menuState[currentMenuState].text);
+//      tftMenuPrint(menuState[currentMenuState].text);
+//    } else {
+//      Serial.println("No Submenu");
+//      limitMax = menuState[currentMenuState].limitMinCB;
+//      limitMin = menuState[currentMenuState].limitMaxCB;
+//      infoCallback = menuState[currentMenuState].getCB;
+//      currentPosition = menuState[currentMenuState].currentPositionCB;
+//      callback = menuState[currentMenuState].setCB;
+//      encoder.setLimits(limitMax(), limitMin());
+//      encoder.setCurrentPosition(currentPosition());
+//      encoderPrev = encoder.getCurrentPosition();
+//      while(1) {
+//        if (encoder.buttonPressed()) {
+//          break;
+//        }
+//        if (encoder.getCurrentPosition() != encoderPrev) {
+//          encoderPrev = encoder.getCurrentPosition();
+//          callback(encoderPrev);
+//          // Draw current setting on screen
+//          tftMenuPrint(menuState[currentMenuState].text);
+//          tftIntPrint(currentPosition());
+//        }
+//      }
+//    }
+//  }
+
+  (void) encoder.buttonPressed();
+  if (encoder.buttonLongPressed()) {
+    Serial.println("Button longpressed");
+    menuLevel = 0;
+    tft.fillScreen(ST7735_BLACK);
+    tftModePrint(currentMode);
+  }
+
+/* menu navigation
+  if (encoderPrev < encoder.getCurrentPosition()) {
+    encoderPrev = encoder.getCurrentPosition();
+    Serial.print("Menu: ");
+    currentMenuState = menuState[currentMenuState].nextState;
+    Serial.print(currentMenuState);
+    Serial.print(" ");
+    Serial.println(menuState[currentMenuState].text);
+    tftMenuPrint(menuState[currentMenuState].text);
+    tftIntPrint(28);
+  } else if (encoderPrev > encoder.getCurrentPosition()) {
+    encoderPrev = encoder.getCurrentPosition();
+    Serial.print("Menu: ");
+    currentMenuState = menuState[currentMenuState].prevState;
+    Serial.print(currentMenuState);
+    Serial.print(" ");
+    Serial.println(menuState[currentMenuState].text);
+    tftMenuPrint(menuState[currentMenuState].text);
+    tftIntPrint(29);
+  }
+*/
+}
+
+void tftModePrint(const int mode) {
+  tft.fillRect(0, 20, 160, 40, ST7735_BLUE);
+  tft.setTextSize(2);
+  tft.setCursor(0, 50);
+  tft.print(menuModeName[mode]);
+}
+
+void tftMenuPrintList() {
+  tft.fillRect(0, 55, 160, 128, ST7735_GREEN);
+  tft.setCursor(0, 70);
+  tft.setTextSize(1);
+  currentMenuState = currentMenuState - 1;
+  currentMenuState = (currentMenuState % 4);
+  tft.print(currentMenu[currentMenuState].text);
+  currentMenuState = (currentMenuState + 1) % 4;
+  tft.setCursor(0, 100);
+  tft.setTextSize(2);
+  tft.print(currentMenu[currentMenuState].text);
+  currentMenuState = (currentMenuState + 1) % 4;
+  tft.setCursor(0, 120);
+  tft.setTextSize(1);
+  tft.print(currentMenu[currentMenuState].text);
+  currentMenuState = (currentMenuState - 1) % 4;
+}
+
+void tftMenuPrint(const char *text) {
+  tft.fillScreen(ST7735_BLACK);
+  tft.setCursor(0, 50);
+  tft.print(text);
+}
+
+void tftDataPrint(const char *text) {
+  tft.setCursor(0, 50);
+  tft.print(text);
+}
+
+void tftIntPrint(const int num) {
+  char string[8];
+  sprintf(string, "%d", num);
+  //tft.setCursor(90, 50);
+  tft.print(" ");
+  tft.print(string);
+}
+
+void testdrawtext(char *text, uint16_t color) {
+  tft.setCursor(0, 0);
+  tft.setTextColor(color);
+  tft.setTextWrap(true);
+  tft.print(text);
+}
+
+
+/* testing slider hardware functionality */
+//void removed() {
+//    if (StatisticsDelay.hasPassed()) {
+//    StatisticsDelay.reset();
+//    Serial.print("CamFoc: ");
+//    Serial.print(digitalRead(cameraTriggerFocus));
+//    Serial.print(" CamPic: ");
+//    Serial.print(digitalRead(cameraTriggerPic));
+//    Serial.print(" Enc Press: ");
+//    Serial.print(encoder.buttonPressed());
+//    Serial.print(" Enc count: ");
+//    Serial.print(encoder.getCurrentPosition());
+//    Serial.print(" Left: ");
+//    Serial.print(!digitalRead(directionSwitchLeft));
+//    Serial.print(" Right: ");
+//    Serial.print(!digitalRead(directionSwitchRight));
+//    Serial.print(" End1: ");
+//    Serial.print(analogRead(hallSensorLeft));
+//    Serial.print(" End2: ");
+//    Serial.print(analogRead(hallSensorRight));
+//    Serial.print(" Voltage: ");
+//    Serial.println(map(analogRead(batterySensor), 0, 1023, 0, 20));
+//  }
+//  if (triggerDelay.hasPassed()) {
+//    triggerDelay.reset();
+//    if (cameraTriggerState == 3) {
+////      Serial.println("Entering state 3. Resetting");
+//      cameraTriggerState = 0;
+//    }
+//    
+//    if (cameraTriggerState == 2) {
+//      cameraTriggerState++;
+////      Serial.println("Entering state 2. All lights off");
+//      digitalWrite(triggerFocus, LOW);
+//      digitalWrite(triggerPic, LOW);
+//    }
+//    
+//    if (cameraTriggerState == 1) {
+////      Serial.println("Entering state 1. Pic");
+//      cameraTriggerState++;
+//      digitalWrite(triggerPic, HIGH);
+//    }
+//    
+//    if (cameraTriggerState == 0) {
+////      Serial.println("Entering state 0. Focus");
+//      cameraTriggerState++;
+//      digitalWrite(triggerFocus, HIGH);
+//    }
+//  }
+//}
+

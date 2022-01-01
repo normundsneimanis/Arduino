@@ -1,0 +1,29 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+// gcc -std=c99 -Wall
+
+#define DAYTOTAL_MAX 6
+uint8_t dayTotal[DAYTOTAL_MAX];
+
+
+int main(void) {
+	uint8_t cipars = 22;
+	for (uint8_t i = 0; i < DAYTOTAL_MAX - 2; i++) {
+		dayTotal[i] = cipars++;
+		printf("Set dayTotal[%d] = %d\n", i, dayTotal[i]);
+	}
+
+	for (int i = DAYTOTAL_MAX - 2; i >= 0; i--) {
+		dayTotal[i+1] = dayTotal[i];
+		printf("moved dayTotal[%d] = %d\n", i, dayTotal[i]);
+	}
+	dayTotal[0] = 0;
+
+	for (uint8_t i = 0; i < DAYTOTAL_MAX - 1; i++) {
+		printf("dayTotal[%d] = %d\n", i, dayTotal[i]);
+	}
+
+	return 0;
+}

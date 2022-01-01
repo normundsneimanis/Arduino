@@ -1,0 +1,20 @@
+
+ESD Protection
+==============
+
+Protect in/out where user can touch
+------------------------------------
+ o Easiest way to protect pure outputs is to
+	o buffer them with a gate (lots of 74 and 4000 series parts to do this), 
+	o in the case of an analog output an opamp.
+
+ o especially sensitive: USB devices
+	o High-speed buses require specialist protection diodes, for instance NXP PRTR5V0U4D
+ o series resistor (where applicable)
+ o A 3 nF cap between your signal and GND (or Chassis Gnd) can help to greatly absorb any spike. For best ESD protection, put it between your series resistor and chip. For best EMI filtering, put it between the resistor and your connector. 
+
+Power lines protection
+----------------------
+ o Fuse
+ o TVS or MOV
+

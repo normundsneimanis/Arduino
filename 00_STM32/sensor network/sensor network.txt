@@ -1,0 +1,120 @@
+System Requirements
+-------------------
+
+ o 150 batteries 3-4 kinds in a row. 4x15 = 60 sensors
+ o sensors with voltage divider: sensor -> 10K 1% resistor
+ o what connector to use for connecting sensors? JST 1.25mm pitch 15pin
+ o Termistoru elektriibas piesleegshanas mosfeta (pa 10 gab.)
+ o what is maximum current we want to detect? 20A, shunt resistor 1w dissipation @20A (800W) load
+ o temperature overload enable something (low-side mosfet)
+ o freewheel ADC in seperate uC, moving reading to main uC via serial
+ 
+ o current sensing calculations 
+	o maximum @20A voltage drop accross 0.05R sense resistor is 1V
+	o uC sense op-amp negative feedback resistors: 4K 1%, 1K 1%
+	o RC filter, 100R, 1uF for 1.6kHz cutoff frequency
+	o test with voltage divider of 500R resistor with 10K potentiometer
+
+
+Old plan
+--------
+
+ o test voltage sense with resistor - required voltage gain and stability is achieved
+ o test voltage sensw with oscillator source 0 - 1Vpp
+
+# Antother idea of current sensing
+http://www.avrfreaks.net/forum/shunt-resistor-measure-total-dc-circuit-current
+
+http://embedded-lab.com/blog/how-to-measure-dc-current-with-a-microcontroller/
+
+Current plan
+------------
+ o STM32F207 microcontroller running @72MHz
+ o 0-20A current sensing with ACS712ELCTR 20A. how to get 3.3V range (newest is ACS722LLCTR-20AU-T)
+ o MicroSD card
+ o pedal sensing to interrupt pin (ground + sense), high impedance  \
+ o gas position sensing (ground + gas), high impedance               => common ground input, with three inputs
+ o current speed input from hall sensor (ground + hall)             /
+ o beeper for battery error
+ o button for battery error acknowledgment
+ o 44V - 20V battery voltage sensor range
+ o ADC stability
+	o use precision voltage reference. How to get stable 5V reference?
+	o filter the input with multiple caps
+	o RC filter circuit (ability to override with 0R)
+ o Connectors for each battery cell voltage
+ o BMS ideas can be taken from https://github.com/rickygu/openBMS
+
+
+TODO
+----
+ o Done check how to connect beeper
+ o Done draw beeper footprint in Altium
+ o Done get 3.3V for STM microcontroller
+ o Done Check NTC sensors
+ o Done Draw small buzzer in Altium
+ o Done How to connect all the batteries to the PCB? KF350 connectors in line
+ o Done Draw combinable small green conector footprints in Altium (https://www.aliexpress.com/store/product/KF350-2p-3-5mm-pitch-7-5mm-PCB-Screw-Terminal-Block-Connectors-binding-post-wire-connecting/609688_807363150.html)
+ o Done Draw large blue connectors in Altium (https://www.makeralot.com/kf3012p-terminal-block-connector-508mm-p53/)
+ o CNN because we can get it from LTC.  Calculate 44V - 20V battery voltage range (For 5V: R1: 12K R2: 1K)
+ o Done test ACS712 current sensor
+ o Done Calculate Voltage divider values for NTC sensors: NTC -> 5K6
+ o Done diodes from controller 5V to mosfet. Diode from uC to mosfet. diode from 5V to uC digital input 
+ o Done Each batery cell monitoring (LTC6802), https://sourcelion.wordpress.com/2014/07/20/battery-management-system-ltc6802-arduino/ openbms.ino
+ o Done Detect charging (44V voltage divider R1: 8K R2: 1k)
+ o Done Current state of the battery (44V voltage divider R1: 8K R2: 1k)
+ o Done Add timekeeper iC
+ o Done Put it all together, do the architecture
+ o Done What do I want to log, how frequently? How will I aggregate the logged results?
+	o plot cell voltages, total voltages, speed, pedal, gas, current
+	o datestring along with every line
+	o log date, cell voltages once per 10 minutes
+	o log date, average pas, gas, speed, current once per 60 seconds. Log when pause occurred
+	o Watts: volts x amps. Need to know volts
+	o log charging started, charging finished
+ o Done Make high quality print-screen from openbms schematic document
+ o Done From openBMS BOM, find out which clamping diodes and which ferrite bead or choke is required?
+	o Ferrite bead: 100Mhz 1206.
+	o DIODE ZENER 62V 500MW SOD123 (Argus BZX85C062; 1.3W 62V DO41)
+	o Zener 7.5V for each cell (argus BZV55C007.5; 0.5W 7V5 MINIMELF min.10gab)
+	o IRLML9301 SOT-23 P-FET <200mOhm on resistance, 1W heat dissipation, 2A current
+ o Done Test 0-5V voltage follower with quad op-amp (LM224D and LM224N, LM324D and LM324N)
+ o Done Altium draw discharging network in a seperate sheet, including protection (100R) resistor and zener diode
+ o Done Altium connect discharging network to the LTC
+ o Done Split in two projects. One is BMS (balancer), second is controller with sensors and inputs. Interface is:
+	o cell 12 voltage to mosfet for enabling and battery pack voltage measurement 
+	o battery pack ground
+	o serial connection to LTC
+	o no isolation
+ o Done Altium add the other required connections to LTC
+ o Simple as possible managing circuit:
+	o Atmega328 connects to serial interface of battery pack
+	o Enablement circuit with power connection from motor controller
+	o MicroSD Card slot
+ o Altium add analog demultiplexer and filter circuit
+ o Altium Draw motor controller sensor connectors and op-amps
+
+
+ o Enablement circuit
+	o https://electronics.stackexchange.com/questions/304133/need-a-soft-latching-power-on-off-that-starts-off
+	o quad 2-input OR gate 74HC32 with 20uA power consumption; 42V voltage divider for giving required current - 200K resistor
+	o All OR gate inputs pulled down with 100K resistors
+
+ o SD card protected by 74HC125
+ o 3.3v for SD card is given by LDO regulator
+
+ o Add card OK LED
+ o Add sensors OK LED
+ o Add balancing Now LED
+ o Add Charging Now LED
+ o Add Turned ON LED
+ o Add clock OK Led
+ o Transistor to disable bike? IRF3710S CNN because we want to switch on from console
+ o Add ports for reading PAS (interrupt), gas (ADC) and speed (Interrupt) (op-amps which were previously tested - LM324N, with pull-down resistors on input)
+
+Version 1.1
+ o CNN Add screw holes with ground in the corners
+ o Add buzzzer
+
+
+# BQ77PL900 - cheap 5-10S battery management and balancer IC

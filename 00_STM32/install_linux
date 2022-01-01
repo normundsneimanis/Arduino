@@ -1,0 +1,24 @@
+
+
+sudo apt-get install software-properties-common
+sudo add-apt-repository ppa:laczik/ppa
+sudo apt-get update
+
+sudo apt-get install libusb-dev libusb-1.0-0 libusb-1.0-0-dev pkg-config sdcc
+
+# STM8 should be supported
+sdcc -v | grep stm8
+
+git clone https://github.com/vdudouyt/stm8flash.git
+cd stm8flash
+make
+
+
+# https://www.cnx-software.com/2015/04/13/how-to-program-stm8s-1-board-in-linux/
+git clone https://github.com/vdudouyt/sdcc-examples-stm8.git
+git clone https://github.com/texane/stlink
+
+
+git clone https://github.com/OpenSource-EBike-firmware/BMSBattery_S_controllers_firmware.git
+
+

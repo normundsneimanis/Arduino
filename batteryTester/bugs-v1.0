@@ -1,0 +1,41 @@
+Done * +5v is under each TP chip, cover it with green color
+Done * +5v in is going through tiny legs to the under plane. Make some naked metal and make sure that hole is going through large metal
+DONE * make thicker +5v lines - top towards bottom and bottom towards the top
+ * line up N1F connector
+ * Add external capacitor on AREF pin (what capacitance?) 10-100nF
+ * Add external 5V voltage reference?
+ * add pull-down resistors for battery voltage reference, 10K
+ * Lieli caurumi konektoru kaajinjaam
+ * aizvietot 2012 rezistorus uz 0805 pie displeja
+
+ 
+ Plaanojam 2 slaanju versiju
+ * paartaisiit vienu projektu uz 2 projektiem
+ * atrast starplikas un skruuviites, noteikt starpliku garumu TFF-M3X12/DR113, skruuves B3X6/BN1435
+ * uztaisiit bus no vienas plates puses uz otru
+ * Pielikt 2 +5V voltage inputus, lai mazinaatu sprieguma kritumu
+ * pielikt voltage referenci TL431
+ * Pievienot charge/dischage/test slider switchu vai varbuut DIP switchu?
+ * dzeseeshana laadeeshanas chipam
+ * mikrokontroliera vadiiba aiz shotkija diodes?? Kapeec? Ja spriegums kriitas, vinjsh kritiisies arii mikrokontrolierii Shotkija diodes MBR0520L 
+ * paartaisiit 1R rezistoru padus uz Large, lai mazinaatu lodeeshanas kljuudu radiito pretestiibu vienaa punktaa
+ 
+Nopirkt.
+ * 1.2K rezistorus
+ * SN74HC595D
+ * Distancerus TFF-M3X12/DR113
+ * Skruuves B3X6/BN1435
+ * Distancerus ar galu B3X12/BN3321
+
+ 
+ 
+DONE Notesteed ar 5V, vai nepaarkarst rezistori
+DONE Notesteet, cik liels voltage drop ir ar 0.5R rezistoru (10A load) - nopirkt 1R 50W resistor 2x AX50WR-1R
+DONE Notesteet, kaa uzvedas TL431, kad kriit padeves spriegums. stabili straadaa uz 4.3V. Saak kristies, kad kriit zem 3.9V
+http://solderer.tv/tl431-calculator/?lang=ru&u_in_min=4.5&u_in_max=5.1&u_out=4.3&i_out=1&i_div_ref=200&type-schem=1&res_st=e24
+
+Pasuutiit https://skailoks.lv/shop/p7255/rigol-ds1074z-plus-osciloskops/&l=lv
+
+solder wick WICK ENTLOTLITZE4
+
+2.2+3.3+3= 

@@ -1,0 +1,13 @@
+20x  DG306-5.0-2P12 terminal bloki
+2x TL431ACD voltage reference
+33K resistors 20x
+2k resistors 20x
+2k2 resistors 20x
+330r resistors 100x
+3k3 resistors 10x
+56k resistors 10x
+1k5 for charging voltage reference
+100nF kondensatori CC-100N 20x
+100nF kondensatori CL21B104JBCNNNC 20x
+8port connectors for display
+long needle connectors for programming and rotary encoder

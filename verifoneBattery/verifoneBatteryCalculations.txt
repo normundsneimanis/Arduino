@@ -1,0 +1,13 @@
+1mm2 wire required, 15 metri
+
+24V: 3 batteries in parallel for 24v
+Charger: 24-25.2V charger from kraajumi
+
+36V: 10 batteries in series, 5 parallel, expected load = 2A max from single battery (what are the battery specs?)
+
+TODO Test max battery load before BMS shuts it down
+
+Discharge current for 1800mAh battery: 1S: 1.8A 8V / 1.8A = 5R resistors, 20W
+
+8R2, 10W, 4pcs, ar piespiedu ventilaciju
+

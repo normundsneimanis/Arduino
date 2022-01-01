@@ -1,0 +1,19 @@
+# Embedded platforms
+https://os.mbed.com/platforms/
+
+
+# STM F2 board schematic and other info
+http://www.st.com/content/st_com/en/products/evaluation-tools/product-evaluation-tools/mcu-eval-tools/stm32-mcu-eval-tools/stm32-mcu-nucleo/nucleo-f207zg.html
+
+https://github.com/rogerclarkmelbourne/Arduino_STM32/wiki/Programming-an-STM32F103XXX-with-a-generic-%22ST-Link-V2%22-programmer-from-Linux
+https://github.com/ubogdan/STM32F103C8T6
+
+
+http://www.learningaboutelectronics.com/Articles/Bandpass-filter-calculator.php
+
+
+# Electronics
+http://hyperphysics.phy-astr.gsu.edu/hbase/Electronic/etroncon.html#c1
+
+# Op-amp band-pass filters
+http://www.learningaboutelectronics.com/Articles/Bandpass-filter-calculator.php

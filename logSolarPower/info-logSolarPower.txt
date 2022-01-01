@@ -1,0 +1,10 @@
+# DS1307 alarms - set bits in RAM
+https://forum.arduino.cc/index.php?topic=147313.0
+
+# Arduino install RTCLib for accessing RTC
+
+# Test serial to parallel with
+../batteryTester/btTestSerToP/btTestSerToP.ino
+
+# Test SD card with the following
+../test_SDCard2/test_SDCard2.ino
