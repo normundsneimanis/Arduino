@@ -1,0 +1,30 @@
+# Voltage divider resistors
+1000 kOhm
+330 Ohm
+
+# Calculation
+# http://www.raltron.com/cust/tools/voltage_divider.asp
+# ADC size (8,10,12 bits) * output voltage / board voltage
+# LiPo cell vs capacity
+# http://www.rcgroups.com/forums/showthread.php?t=2015863
+# lead acid battery voltage
+# http://electronics.stackexchange.com/questions/38321/what-should-the-voltage-of-a-fully-charged-lead-acid-battery-be
+# calculate required capacity
+# http://www.powerstream.com/battery-capacity-calculations.htm
+
+# Li-ion empty
+input voltage 11.5
+output voltage 2.853
+reading 583.7238
+
+# Full battery
+input voltage 14
+output voltage: 3.474
+reading 710.7804
+
+# pb battery empty
+input voltage: 11.8
+output voltage: 2.928
+reading: 609.708
+
+# convert reading to voltage
